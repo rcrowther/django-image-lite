@@ -1,0 +1,52 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static "image/css/forms.css" %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    
+  <h1>Render reforms</h1>
+    <div class="src-image-display">
+      <h2>source image data</h2>
+      <div class="field-display-row">
+        <span class="label">PK:</span>
+        <span>{{ image.pk }}</span>
+      </div>
+      <div class="field-display-row">
+        <span class="label">Filename:</span>
+        <span>{{ image.filename }}</span>
+      </div>
+    </div>
+
+    <h2>reform</h2>
+    <div class="form-content">
+    <form method="post">
+      {% csrf_token %}
+    <!---
+    {{ form }}
+    --->
+      {% for field in form %}
+      <div class="form-row field-{{ field.label }}">
+        <div>
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+        {% if field.help_text %}
+          <div class="help">{{ field.help_text|safe }}</div>
+        {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      </div>
+      
+      <div class="submit-row">
+        <input type="submit" value="Generate reforms" class="button">
+      </div>
+    </form>
+<!--- content-main --->
+          
+<!--- container --->
+</div>
+{% endblock %}

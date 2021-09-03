@@ -1,0 +1,38 @@
+= project
+Git
+Flit publish
+Django packages
+
+= README
+x rewrite
+
+= URL
+x No. Unidecode
+
+= Models
+? Different deploy path checks
+
+= Registry
+x new registry
+x decorators
+? Registration accept freeform list
+
+= Upload
+x Prevent repeated filenames
+x Consider model options
+
+= Reforms
+x check delete option
+
+= tags
+x Get working
+? Broken image tag
+
+= Management commands
+x Revise
+
+= Filters
+
+
+= Admin
+x revise stock model

@@ -1,0 +1,61 @@
+{# extends 'sitebase.html' #}
+
+{% load img_tags %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>
+            {{ image.filename }} - image_app
+        </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            article {
+                max-width:30em;
+                margin:2em auto;
+            }
+            .imagedetail-img {
+                display:block; 
+                margin:24pt auto;
+                border:solid 8px AntiqueWhite;
+            }
+            dt {
+                font-variant: small-caps;
+            }
+            dt::after{
+                content:":"
+                }
+            
+        </style>
+    </head>
+    <body>
+        <article>
+        <h2>Image</h2>
+        <p>This is the image as rendered from a template tag through the builtin filter 'image.Thumb':</pp>
+        <figure>
+                {% image image image.Thumb class="imagedetail-img" %}
+        </figure>
+        <p>Information from the original DB model:</pp>
+        <dl>
+            <dt>upload_time</dt>
+            <dd>{{ image.upload_time }}</dd>
+            <dt>src (as a path)</dt>
+            <dd>{{ image.src }}</dd>
+            <dt>width</dt>
+            <dd>{{ image.width }}</dd>
+            <dt>height</dt>
+            <dd>{{ image.height }}</dd>
+            <dt>bytesize</dt>
+            <dd>{{ image.bytesize }}</dd>
+        </dl>
+        <p>Information derived from the original DB model:</pp>
+        <dl>
+            <dt>filename</dt>
+            <dd>{{ image.filename }}</dd>
+            <dt>is_portrait</dt>
+            <dd>"{{ image.is_portrait }}"</dd>
+        </dl>
+        
+        </article>
+    </body>
+</html>

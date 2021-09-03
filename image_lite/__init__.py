@@ -1,4 +1,4 @@
-"""Image handling for Django. Includes upload code, repository and filter creation. Low on features, fast setup, modular."""
+"""Local image handling for Django. Unobtusive, with multiple repositories, powerful filter system and scaleable data."""
 __version__ = '0.0.1'
 
 from image_lite.decorators import register

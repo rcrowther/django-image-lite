@@ -234,8 +234,10 @@ class AbstractImage(models.Model):
         # make a base path and filename
         reform_base_path = Path(settings.MEDIA_ROOT) / self.reform_dir
     
-        ##? on app registration   
-        #Path(dst_dir).mkdir(parents=True, exist_ok=True)
+        # Storage does this every time for a filesave. Seems inelegant,
+        # but let's follow the same path, and asset the directory
+        #?! not using storage permissions
+        reform_base_path.mkdir(parents=True, exist_ok=True)
 
         fname = str(Path(self.filename).stem)
         reform_file_path =  Path(reform_base_path) / fname

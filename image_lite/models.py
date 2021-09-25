@@ -77,6 +77,8 @@ class AbstractImage(models.Model):
     # If None, any size allowed. In MB. Real numbers allowed.
     max_upload_size = 2
     
+    filters = []
+    
     #  on DB record deletion, delete originals.
     auto_delete_files=False
     
@@ -95,7 +97,7 @@ class AbstractImage(models.Model):
         # Delete reforms
         cls = self.__class__
         reform_dir_path = cls.reform_dir_path() / self.filename
-        for filter_class in cls.filters():
+        for filter_class in cls.get_filters():
             reform_path = Path(filter_class.add_suffix_to_path(reform_dir_path))
             reform_path.unlink(missing_ok=True)
             
@@ -206,7 +208,7 @@ class AbstractImage(models.Model):
         return path 
     
     @classmethod
-    def filters(cls):
+    def get_filters(cls):
         '''
         Returns a list of Filter classes configured on this model.
         '''
@@ -236,14 +238,17 @@ class AbstractImage(models.Model):
     
         # Storage does this every time for a filesave. Seems inelegant,
         # but let's follow the same path, and asset the directory
-        #?! not using storage permissions
         reform_base_path.mkdir(parents=True, exist_ok=True)
 
         fname = str(Path(self.filename).stem)
         reform_file_path =  Path(reform_base_path) / fname
         
-        # run filters on file
-        filters = registry(self)
+        # run filters on file 
+        filters = self.get_filters()
+        if (self.filters):
+            filters = [f for f in filters if f.name() in self.filters]
+
+        #print(str(filters))
         for filter_class in filters:
             reform_path = filter_class.add_suffix_to_path(reform_file_path)
 
@@ -294,6 +299,7 @@ class AbstractImage(models.Model):
             # attributes exist, at least as default.
             #*checks.check_type('reform_model', cls.reform_model, str, '{}.E001'.format(name), **kwargs),
             #*checks.check_str('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
+            *checks.filters_configured(cls._meta.app_label, cls.filters, '{}.E003'.format(name), **kwargs),
             *checks.check_numeric_range('filepath_length', cls.filepath_length, 1, 65535, '{}.E003'.format(name), **kwargs),
             *checks.check_image_formats_or_none('accept_formats', cls.accept_formats,'{}.E004'.format(name), **kwargs),
             *checks.check_positive_float_or_none('max_upload_size', cls.max_upload_size, '{}.E003'.format(name), **kwargs),

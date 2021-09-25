@@ -66,12 +66,7 @@ class ClassByModuleRegistry:
             # raise NotRegistered('Class can not be unregistered {}'.format(k))
         # del self._registry[k]
 
-    def __call__(self, klass_or_instance):
-        '''
-        A list of classes registered in the module.
-        '''
-        r = None
-        app_name = utils.app_name(klass_or_instance) 
+    def value_by_name(self, app_name):
         try:
             r = self._registry[app_name]
         except KeyError:
@@ -79,15 +74,16 @@ class ClassByModuleRegistry:
             app_name
             ))
         return r
-        
-    def get_filter(self, app_name, filter_name):
-        class_list = self._registry.get(app_name, [])
+                
+    def __call__(self, klass_or_instance):
+        '''
+        A list of classes registered in the module.
+        '''
         r = None
-        for k in class_list:
-            if (k.__name__ == filter_name):
-                r = k
-                break
-        return r
+        app_name = utils.app_name(klass_or_instance)
+        return self.value_by_name(app_name)
+        
+
                 
     @property
     def list_apps(self):
@@ -130,6 +126,18 @@ class FilterRegistry(ClassByModuleRegistry):
                 ))
             super().register(filter_class)
 
+    def get_filter(self, app_name, filter_name):
+        class_list = self._registry.get(app_name, [])
+        r = None
+        for k in class_list:
+            if (k.__name__ == filter_name):
+                r = k
+                break
+        return r
+        
+    def registered_names(self, app_name):
+        class_list = super().value_by_name(app_name)
+        return [f.name() for f in class_list]
     # def unregister(self, class_or_iterable):
         # if (not isinstance(class_or_iterable, Iterable)):
             # class_or_iterable = [class_or_iterable]

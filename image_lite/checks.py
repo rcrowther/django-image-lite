@@ -4,7 +4,7 @@ from image_lite.constants import IMAGE_FORMATS
 
 
 # Needs clearout
-## This app speccific
+## This app specific
 def check_filters(**kwargs):
     '''
     Check registered filters with Django static checks framework.
@@ -100,8 +100,22 @@ def check_jpeg_legible(jpeg_quality, eid, **kwargs):
         ))   
     return errors 
 
+def filters_configured(app_name, filters, eid, **kwargs):
+    from image_lite.registry import registry
 
-
+    errors = []
+    available_filters = registry.registered_names(app_name)
+    for fname in filters:
+        if (not(fname in available_filters)):
+            errors.append(
+                checks.Error(
+                    "'filter' value '{}' is not in filter registry.".format(
+                    fname
+                ),
+                id=eid,
+            ))      
+    return errors 
+    
 ## General
 def check_is_subclass(setting_name, v, base_klass, eid, **kwargs):
     errors = []

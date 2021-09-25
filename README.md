@@ -29,12 +29,12 @@ So, if you have a model of, say, a product, how do you associate uploaded images
 
 There are downsides to this approach,
 - It puts the burden on the user to create filenames as intended. A solution using foreign keys could upload any image, then automatically make the connection
-- Since the models do not know (much) about the attached images, much editing of uploaded images is pushed back onto management commands 
+- Since the models do not know (much) about the attached images, editing of uploaded images is often pushed back onto management commands 
 - Django admin for the models can not display the upload form (no model field to render). 
 
 But there are upsides,
 - Django admin displays for foreign fields are very limited. As default they are select boxes. ImageLite's URL system is more pleasant.
-- Without foreign fields, the syatem is easier to scale. If you wish to move image handling out of Django, there are no foreign fields to remove, and the image data is naturally organised
+- Without foreign fields, the system is easier to scale. If you wish to move image handling out of Django, there are no foreign fields to remove, and the image data is naturally organised
 
  
 ## Overview
@@ -45,10 +45,10 @@ Each original image can generate derivative images. Derivative images are untrac
 Image delivery is by template tag. The tags write HTML elements with an appropriate URL. The model tag constructs the URL by asking the model instances they receive.
 
 ## If you have done this before
-- [subclass the models for Image and Reform](#custom-image-repositories) to create a repository. Tweak settings.
+- [subclass the base model for Image](#custom-image-repositories) to create a repository. Tweak settings.
 - Migrate custom repository tables
 - Set an [admin](#admin)
-- Create 'image_filters.py' files in page apps, then [subclass a few filters](#filters)
+- Create an 'image_filters.py' file in the app, then [subclass a few filters](#filters)
 - Insert [template tags](#rendering) into relevant templates
 
 
@@ -94,7 +94,7 @@ Now you need to [declare a repository](#custom-image-repositories). Further exam
 
 
 ### Make some filters
-In the repository, create a flle image_filters.py. Paste this into it,
+In the repository, create a file image_filters.py. Paste this into it,
 
     from image_lite import filters_pillow, register
 
@@ -167,7 +167,9 @@ For example, you may want an image repository attached to a main Article model, 
  
 
 ### Subclassing AbstractImage 
-Custom Image repository code is placed in 'models.py' files and migrated. You decide how you want your namespacing to work. The code can be placed in an app handling one kind of model or, for general use, in a separate app. For a separate app,
+Custom Image repository code is placed in 'models.py' files and migrated. You decide how you want your namespacing to work. The code can be placed in an app handling one kind of model or, for general use, in a separate app. Or you can have one seperate app, called for example ''site_images'. handling several repositories (I'm fond of this level of encapsulation).
+
+For a separate app,
 
     ./manage.py startapp news_article_images
 
@@ -224,10 +226,13 @@ An expanded version of the above,
         accept_formats = ['png']
         max_upload_size=2
         auto_delete_files=True
+        filters=[]
         reform_dir='news_reforms'
         ...
 
-I hope what these attributes do is easy to understand. Nine of them are available through standard Django or, not in this simple way.
+I hope what these attributes do is easy to understand. None of them are available through standard Django or, not in this simple way.
+
+The 'filters' attribute may need a little explanation. You provide an 'image_filters' file with each app, which implements image-lite. By default, the code will apply all the ''image_filters' to any uploaded file. This is awkward if there is two or more repositories in one app, because they all apply the same filters. You probably wouldn't do this, but if yyou had a repsoitory and filter for banner images, every other repository in the app will generate banner images. In this case, you can set filters to a list of filter names, which will be the only ones used for that repository.
 
 Migrate, and you are up and running.
 
@@ -461,7 +466,7 @@ Because it makes life easy for coders and users. If you want to produce a front-
 
 ## Admin
 ### Overview
-Repositort apps start with stock Django admin. However, this is not always suited to the app, it's intended or possible uses. So there is a pre-configured admin.
+Repository models start with stock Django admin. However, this is not always suited to the app, it's intended or possible uses. So there is a pre-configured admin.
 
 #### ImageLiteAdmin
 Significant changes from stock admin,
@@ -487,7 +492,7 @@ Easy as this,
 ##### Notes and alternatives for ImageLiteAdmin
 You may provide no admin at all. You can use the './manage.py' commands to do maintenance. The stock admin is provided to get you started.
 
-If you prefer your own admin, look at the code for ImageLiteAdmin in '/image/admins.py'. It provides some clues about how to do formfield overrides and other customisation. You may find it more maintainable to build the admin code, rather than import and override.
+If you prefer your own admin, look at the code for ImageLiteAdmin in '/image/admins.py'. It provides some clues about how to do formfield overrides and other customisation. You may find it more maintainable to build new admin code, rather than import and override.
 
 
 ## Rendering
@@ -502,7 +507,7 @@ or use template tags.
 Currently, the app has two template tags. Both build a full HTML 'img' tag. Both accept keyword parameters which become HTML attributes.
 
 #### The 'image' tag
-The main tag. It depends on calling a page creation model to construct a URL. So you need a callable on the page model (not the image model). This callable is usually very simple, and must return the entire reform filename. You can make a few callables, one for every filter e.g.
+The main tag. It depends on calling a model to construct a URL. So you need a callable on the page model (not the image model). This callable is usually very simple, and must return the entire reform filename. You can make a few callables, one for every image reform you want to use e.g.
 
     class NewsArticle():  
         ...
@@ -534,7 +539,7 @@ The above tag is mainly to retrieve images associated with page data. This tag l
     {% image_fixed news_images.NewsImage forest_fire Stock class="ruled" %}
 
 
-then visit the page. Should see the image?
+then visit the page. Should see the image.
 
 ## Management Commands
 They are,
@@ -556,6 +561,6 @@ I've not found a way to test this app without Python ducktape. There should be t
 
 
 ## Credits
-This is a rewrite of the Image app from Wagtail CMS. It is now distant from that app, nd would not work in the Wagtail system. However, some core ideas remain, such as the replicable repositories.
+This is a rewrite of the Image app from Wagtail CMS. It is now distant from that app, and would not work in the Wagtail system. However, some core ideas remain, such as the replicable repositories.
 
 [Wagtail documentation](https://docs.wagtail.io/en/v2.8.1/advanced_topics/images/index.html)

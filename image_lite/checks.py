@@ -19,6 +19,7 @@ def check_filters(**kwargs):
     return errors
 
 
+
 def _image_format_error(setting_name, v, eid, accepted_formats):
     return checks.Error(
                 "'{}' format '{}' unrecognised."
@@ -65,7 +66,35 @@ def check_image_formats_or_none(
         v = ", ".join(unrecognised_formats)
         errors.append(_image_format_error(setting_name, v, eid, accepted_formats))
     return errors 
+
     
+def check_filter_suffix(
+        filter_suffix_value, 
+        filters,
+        eid, 
+        **kwargs
+    ):
+    '''
+    Accepts a list of formats
+    '''
+    errors = []
+    print(str(filter_suffix_value))
+    if (not(filter_suffix_value)):
+        l = len(filters)
+        if (l > 1):
+            errors.append(
+                checks.Error(
+                    "filter_suffix must be True if more than one filter is applied (filenames need namespacing).",
+                    id=eid,
+                ))         
+        if (not(filters)):
+            errors.append(
+                checks.Error(
+                    "filter_suffix can't be False if no filters attribute declaration.",
+                    id=eid,
+                ))                       
+    return errors 
+        
 def check_jpeg_has_quality(img_format, jpeg_quality, eid, **kwargs):
     errors = []
     if (img_format == 'jpg' and (not jpeg_quality)):

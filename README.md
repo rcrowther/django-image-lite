@@ -29,12 +29,12 @@ So, if you have a model of, say, a product, how do you associate uploaded images
 
 There are downsides to this approach,
 - It puts the burden on the user to create filenames as intended. A solution using foreign keys could upload any image, then automatically make the connection
-- Since the models do not know (much) about the attached images, editing of uploaded images is often pushed back onto management commands 
+- Since the models do not know (much) about the attached images, editing of uploaded images is pushed back onto management commands 
 - Django admin for the models can not display the upload form (no model field to render). 
 
 But there are upsides,
 - Django admin displays for foreign fields are very limited. As default they are select boxes. ImageLite's URL system is more pleasant.
-- Without foreign fields, the system is easier to scale. If you wish to move image handling out of Django, there are no foreign fields to remove, and the image data is naturally organised
+- Without foreign fields, the system is easier to scale. If you wish to move image handling out of Django, there are no foreign fields to remove, and image data is naturally organised
 
  
 ## Overview
@@ -228,11 +228,20 @@ An expanded version of the above,
         auto_delete_files=True
         filters=[]
         reform_dir='news_reforms'
+        filter_suffix = True
         ...
 
 I hope what these attributes do is easy to understand. None of them are available through standard Django or, not in this simple way.
 
-The 'filters' attribute may need a little explanation. You provide an 'image_filters' file with each app, which implements image-lite. By default, the code will apply all the ''image_filters' to any uploaded file. This is awkward if there is two or more repositories in one app, because they all apply the same filters. You probably wouldn't do this, but if yyou had a repsoitory and filter for banner images, every other repository in the app will generate banner images. In this case, you can set filters to a list of filter names, which will be the only ones used for that repository.
+The 'filters' attribute may need a little explanation. You provide an 'image_filters' file with each app, which implements image-lite. By default, the code will apply all the 'image_filters' to any uploaded file. This is awkward if there is two or more repositories in one app, because they all apply the same filters. In this case, you can set filters to a list of filter names, which will be the only filters used for that model/repository.
+
+filter_suffix needs explaining. Usually, image-lite extends a filename with the filter name. This namespaces each physical file, so you can keep thumbnails in the same directory as display files. However, if you only usse one filter on a repository, so only generate one reform, then the filtername suffix is unnecessary. Set,
+
+    filter_suffix=False 
+
+and no filter name will be appended. 
+
+Since they are easy to create, I usually have many image repositories in every project, Each one usually has a single general filter, such as a SmartResize and watermark. So I use filter_suffix a lot. The repositories are categorising for me, and I have no need of further namespacing.
 
 Migrate, and you are up and running.
 

@@ -123,7 +123,11 @@ class FormatMixin():
     @classmethod
     def add_suffix_to_path(cls, base_path):
         return str(base_path) + '-' + cls.__name__ + '.' + cls.format
-        
+
+    @classmethod
+    def add_file_suffix_to_path(cls, base_path):
+        return str(base_path) + '.' + cls.format
+                
     @classmethod
     def check(cls, **kwargs):
         errors = super().check(**kwargs)

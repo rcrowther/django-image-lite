@@ -86,6 +86,11 @@ class AbstractImage(models.Model):
     # Reforms naturally inherit filename options
     reform_dir='reforms'
     
+    # Add suffix of filter name to filepaths.
+    # Usually, this is true. But if only one filter is defined, 
+    # explicitly, it can be set false.
+    filter_suffix = True
+    
     
     def delete_file_and_reforms(self):
         '''
@@ -250,8 +255,12 @@ class AbstractImage(models.Model):
 
         #print(str(filters))
         for filter_class in filters:
-            reform_path = filter_class.add_suffix_to_path(reform_file_path)
-
+            reform_path = reform_file_path
+            if (self.filter_suffix):
+                reform_path = filter_class.add_suffix_to_path(reform_file_path)
+            else:
+                reform_path = filter_class.add_file_suffix_to_path(reform_file_path)
+                
             # get filtered buffer
             with self.src.open() as fsrc:
                 filter_instance = filter_class()
@@ -300,9 +309,10 @@ class AbstractImage(models.Model):
             #*checks.check_type('reform_model', cls.reform_model, str, '{}.E001'.format(name), **kwargs),
             #*checks.check_str('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
             *checks.filters_configured(cls._meta.app_label, cls.filters, '{}.E003'.format(name), **kwargs),
-            *checks.check_numeric_range('filepath_length', cls.filepath_length, 1, 65535, '{}.E003'.format(name), **kwargs),
-            *checks.check_image_formats_or_none('accept_formats', cls.accept_formats,'{}.E004'.format(name), **kwargs),
-            *checks.check_positive_float_or_none('max_upload_size', cls.max_upload_size, '{}.E003'.format(name), **kwargs),
+            *checks.check_filter_suffix(cls.filter_suffix, cls.filters, '{}.E004'.format(name), **kwargs),
+            *checks.check_numeric_range('filepath_length', cls.filepath_length, 1, 65535, '{}.E005'.format(name), **kwargs),
+            *checks.check_image_formats_or_none('accept_formats', cls.accept_formats,'{}.E006'.format(name), **kwargs),
+            *checks.check_positive_float_or_none('max_upload_size', cls.max_upload_size, '{}.E007'.format(name), **kwargs),
             ]
         return errors
 

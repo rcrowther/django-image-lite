@@ -121,7 +121,11 @@ def image_fixed_tag(parser, token):
     # construct an alt
     if (not 'alt' in kwargs):
         kwargs['alt'] = f"image of {file_name}"
-    full_name = file_name + '-' + filter_name  + '.' + extension
+    if (im.filter_suffix):
+        full_name = file_name + '-' + filter_name  + '.' + extension
+    else:
+        full_name = file_name  + '.' + extension
+        
     file_path = os.path.join(reform_dir, full_name)
 
     return GetImageNode(reform_dir, file_path, kwargs)

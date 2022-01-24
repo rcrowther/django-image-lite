@@ -78,7 +78,7 @@ def check_filter_suffix(
     Accepts a list of formats
     '''
     errors = []
-    print(str(filter_suffix_value))
+    #print(str(filter_suffix_value))
     if (not(filter_suffix_value)):
         l = len(filters)
         if (l > 1):

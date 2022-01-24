@@ -152,6 +152,30 @@ Index,
 - [Management Commands](#management-commands)
 
 
+## Installation
+For most users, PiPy. The ImageLite core has no migrations, users build custom models for image repositories. However, you must declare the app core in settings, otherwise the app will not be able to find image filters, so you'll get a stream of nasty ''module not found' errors,
+ 
+        INSTALLED_APPS = [
+            ...
+            'image.apps.ImageLiteConfig',
+        ]
+
+Also, you may want to cross-check or declare in settings.py where images will go,
+
+    MEDIA_ROOT = BASE_DIR / 'files_upload'
+    MEDIA_URL = '/images/'
+
+And there are a couple of configuration options for searching for filters (SEARCH_APP_DIRS=True is default, anyway),
+
+    IMAGES = [
+        {
+            'SEARCH_APP_DIRS': True,
+            'SEARCH_MODULES': [
+            ],
+        },
+    ]
+
+
 ## Image Repository models
 ### Overview
 New repositories can be made by subclassing the the core model. Reasons you may want to customise repositories,

@@ -80,7 +80,7 @@ class AbstractImage(models.Model):
     filters = []
     
     #  on DB record deletion, delete originals.
-    auto_delete_files=False
+    auto_delete_upload_file=False
     
     ## Reform options ##
     # Reforms naturally inherit filename options
@@ -101,13 +101,21 @@ class AbstractImage(models.Model):
         '''
         # Delete reforms
         cls = self.__class__
-        reform_dir_path = cls.reform_dir_path() / self.filename
+        reform_file_path = cls.reform_dir_path() / self.filename
         for filter_class in cls.get_filters():
-            reform_path = Path(filter_class.add_suffix_to_path(reform_dir_path))
+            reform_path = filter_class.add_extension_to_path(
+                reform_file_path,
+                self.filter_suffix
+            )
             reform_path.unlink(missing_ok=True)
             
         # delete original
-        self.src.delete(False)            
+        # NB False =
+        # "The optional save argument controls whether or not the model 
+        # instance is saved after the file associated with this field 
+        # has been deleted. Defaults to True."
+        if (self.auto_delete_upload_file):
+            self.src.delete(False)            
             
     @classmethod
     def delete_file(cls, instance, **kwargs):
@@ -115,8 +123,7 @@ class AbstractImage(models.Model):
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__()
-        if (cls.auto_delete_files):
-            models.signals.post_delete.connect(cls.delete_file, sender=cls)
+        models.signals.post_delete.connect(cls.delete_file, sender=cls)
           
     upload_time = models.DateTimeField(_("Datetime of upload"),
         auto_now_add=True, editable=False
@@ -255,11 +262,10 @@ class AbstractImage(models.Model):
 
         #print(str(filters))
         for filter_class in filters:
-            reform_path = reform_file_path
-            if (self.filter_suffix):
-                reform_path = filter_class.add_suffix_to_path(reform_file_path)
-            else:
-                reform_path = filter_class.add_file_suffix_to_path(reform_file_path)
+            reform_path = filter_class.add_extension_to_path(
+                reform_file_path,
+                self.filter_suffix
+            )
                 
             # get filtered buffer
             with self.src.open() as fsrc:
@@ -273,6 +279,13 @@ class AbstractImage(models.Model):
             with open(reform_path, "wb") as f:
                 f.write(reform_buff.getbuffer())
 
+    # Delete is not enabled because:
+    # "Note that the delete() method for an object is not necessarily 
+    # called when deleting objects in bulk using a QuerySet"
+    # And this class wants thar to happen. The option is offered. 
+    #def delete(self, *args, **kwargs):
+        #pass
+        
     @property
     def filename(self):
         '''

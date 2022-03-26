@@ -1,4 +1,5 @@
 from image_lite import checks
+from pathlib import Path
 
 
 
@@ -119,15 +120,23 @@ class FormatMixin():
     '''
     format=None
     jpeg_quality=None
-    
-    @classmethod
-    def add_suffix_to_path(cls, base_path):
-        return str(base_path) + '-' + cls.__name__ + '.' + cls.format
 
     @classmethod
-    def add_file_suffix_to_path(cls, base_path):
-        return str(base_path) + '.' + cls.format
-                
+    def add_extension_to_path(cls, base_path, add_path_suffix):
+        """ Adds a file extension for this image type to a file path.
+        
+        base_path
+            must be a path_lib.Path
+        add_path_suffix
+            Optionally add a suffix to the path itself. The suffix is 
+            currently '-' + filter class name. 
+        """
+        suffix = ""
+        if (add_path_suffix):
+            suffix = '-' + cls.__name
+        suffix = '.' + cls.format
+        return base_path.with_suffix(suffix) 
+                        
     @classmethod
     def check(cls, **kwargs):
         errors = super().check(**kwargs)

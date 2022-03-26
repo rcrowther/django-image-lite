@@ -249,7 +249,7 @@ An expanded version of the above,
         form_limit_filepath_length=True
         accept_formats = ['png']
         max_upload_size=2
-        auto_delete_files=True
+        auto_delete_upload_file=True
         filters=[]
         reform_dir='news_reforms'
         filter_suffix = True
@@ -324,10 +324,15 @@ Note that the base Image does not apply an index to upload_time, so if you want 
 
 ## Auto-delete
 ### Overview
-I read somewhere that a long time ago, Django auto-deleted files. This probably happened in model fields. This behaviour is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete files when the tracking model is deleted.
+I read somewhere that a long time ago, Django auto-deleted files. This probably happened in model fields. This behaviour is not true now. If objects and fields are deleted, files are left in the host system. However, it suits this application, and some of it's intended uses, to auto-delete files.
+
+ImageLite deletes from the 'post-delete' signal. That means it will remove the DB record, then attempt file deletion. If file-deletion fails, it will leave files orphaned. For the purpose of ImageLite, this is seen to be preferable to the alternative, which would block admin forms because file deletion failed.
+
+### Reforms
+ImageLite treats reforms as cache. They can expire, be created, moved and deleted as necessary. So, when an image is deleted, ImageLite always attempts to delete the reforms. It may not succeed, because if you have rebuilt filters or changed filter settings it will not know where to look. But ImageLite will try. If it fails, it fails silently. ImageLite works from a signal, so will always try, for bulk deletes also.
 
 #### Auto-delete Image files
-To auto-delete, set the Image model attribute 'auto_delete_files=True'.  This action is triggered by a signal, so will work for bulk deletes also. The code attempts to remove both the original image and reforms. Reform removal uses constructed filepaths, so is efficient for what it is, but can not clean orphaned reforms or other unsync issues.
+To auto-delete, set the Image model attribute 'auto_delete_upload_file=True'.  This action is triggered by a signal, so will work for bulk deletes also. The code will then attempt to remove both the original image and reforms. 
 
 
 ## Filters

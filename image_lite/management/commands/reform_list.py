@@ -5,7 +5,7 @@ from image_lite.management.commands import common
 from pathlib import Path
 
 
-
+#! wont list subdirs. See reform create
 class Command(BaseCommand):
     help = 'List reforms.'
     

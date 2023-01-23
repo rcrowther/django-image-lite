@@ -101,12 +101,17 @@ class AbstractImage(models.Model):
         '''
         # Delete reforms
         cls = self.__class__
-        reform_file_path = cls.reform_dir_path() / self.filename
+        fname = self.filename
+        reform_file_path = cls.reform_dir_path()
+        reform_file_subpath = reform_file_path
+        first = True
         for filter_class in cls.get_filters():
-            reform_path = filter_class.add_extension_to_path(
-                reform_file_path,
-                self.filter_suffix
-            )
+            if (not(first)):
+                reform_file_subpath =  Path(reform_file_path) / filter_class.classname_as_path_segment()                
+            first = False
+
+            #  make up full filepath
+            reform_path = Path(reform_file_subpath) / (fname + '.' + filter_class.format)
             reform_path.unlink(missing_ok=True)
             
         # delete original
@@ -222,9 +227,16 @@ class AbstractImage(models.Model):
     @classmethod
     def get_filters(cls):
         '''
-        Returns a list of Filter classes configured on this model.
+        Returns a list of Filter classes available on this model.
+        Returns declared filters. If no filters declared, every filter.
         '''
-        return registry(cls)
+        filters = registry(cls)
+        
+        # 'filter' filters if filternames explicitly declared
+        # (the default is to load them all)
+        if (cls.filters):
+            filters = [f for f in filters if f.name() in cls.filters]
+        return filters
 
     @classmethod
     def get_filter(cls, filter_name):
@@ -247,25 +259,40 @@ class AbstractImage(models.Model):
 
         # make a base path and filename
         reform_base_path = Path(settings.MEDIA_ROOT) / self.reform_dir
-    
-        # Storage does this every time for a filesave. Seems inelegant,
-        # but let's follow the same path, and asset the directory
-        reform_base_path.mkdir(parents=True, exist_ok=True)
+        
+        # first write will be to the reform_base_path
+        # (subsequent to subdirectories)
+        reform_file_subpath = reform_base_path
 
+        # asset the directory
+        reform_file_subpath.mkdir(parents=True, exist_ok=True)
+            
+        # Get basic filename
+        #?! why all this protection, for remotes?
         fname = str(Path(self.filename).stem)
-        reform_file_path =  Path(reform_base_path) / fname
         
         # run filters on file 
         filters = self.get_filters()
+        
+        # 'filter' filters if filternames explicitly declared
+        # (the default is to load them all)
         if (self.filters):
             filters = [f for f in filters if f.name() in self.filters]
 
         #print(str(filters))
+        #! firsr filter result goes in reform_base_path
+        # later ones go in subfolder named after the filter
+        first = True
         for filter_class in filters:
-            reform_path = filter_class.add_extension_to_path(
-                reform_file_path,
-                self.filter_suffix
-            )
+            if (not(first)):
+                reform_file_subpath =  Path(reform_base_path) / filter_class.classname_as_path_segment()
+                
+                # asset the directory
+                reform_file_subpath.mkdir(parents=True, exist_ok=True)  
+            first = False
+ 
+            #  make up full filepath
+            reform_path = Path(reform_file_subpath) / (fname + '.' + filter_class.format)
                 
             # get filtered buffer
             with self.src.open() as fsrc:
@@ -278,11 +305,13 @@ class AbstractImage(models.Model):
                 
             with open(reform_path, "wb") as f:
                 f.write(reform_buff.getbuffer())
-
+            
+            first = False
+            
     # Delete is not enabled because:
     # "Note that the delete() method for an object is not necessarily 
     # called when deleting objects in bulk using a QuerySet"
-    # And this class wants thar to happen. The option is offered. 
+    # And this class wants that to happen. The option is offered. 
     #def delete(self, *args, **kwargs):
         #pass
         
@@ -322,10 +351,11 @@ class AbstractImage(models.Model):
             #*checks.check_type('reform_model', cls.reform_model, str, '{}.E001'.format(name), **kwargs),
             #*checks.check_str('upload_dir', cls.upload_dir, 1, '{}.E002'.format(name), **kwargs),
             *checks.filters_configured(cls._meta.app_label, cls.filters, '{}.E003'.format(name), **kwargs),
-            *checks.check_filter_suffix(cls.filter_suffix, cls.filters, '{}.E004'.format(name), **kwargs),
+            #*checks.check_filter_suffix(cls.filter_suffix, cls.filters, '{}.E004'.format(name), **kwargs),
             *checks.check_numeric_range('filepath_length', cls.filepath_length, 1, 65535, '{}.E005'.format(name), **kwargs),
             *checks.check_image_formats_or_none('accept_formats', cls.accept_formats,'{}.E006'.format(name), **kwargs),
             *checks.check_positive_float_or_none('max_upload_size', cls.max_upload_size, '{}.E007'.format(name), **kwargs),
+            *checks.check_filternames_unique(cls.filters, '{}.E008'.format(name), **kwargs),
             ]
         return errors
 

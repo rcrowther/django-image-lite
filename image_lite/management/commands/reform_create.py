@@ -21,6 +21,7 @@ class Command(BaseCommand):
     #! accept liat of filter names
     def handle(self, *args, **options):
         Model = common.get_image_model(options)
+        
         #- get storage
         storage = common.get_storage(Model)
         
@@ -30,7 +31,7 @@ class Command(BaseCommand):
 
         # Need to...
         #- get filters, 
-        filters = registry(Model)
+        filters = Model.get_filters()
 
         # get filenames DB holds
         images_qs = Model.objects.all() #values_list('src', flat=True)
@@ -41,15 +42,21 @@ class Command(BaseCommand):
         for image in images_qs:
             # construct a basic reform path
             src_filename = Path(image.src.name).stem
-            reform_file_path = Path(reform_base_path) / src_filename
-            #print(str(reform_file_path))
 
+            # first write will be to the reform_base_path
+            # (subsequent to subdirectories)
+            reform_file_subpath = reform_base_path
+        
             # We've only got started....
+            first = True
             for filter_class in filters:
-                reform_path = Path(
-                    filter_class.add_suffix_to_local_path(reform_file_path)
-                )
-                
+                if (not(first)):
+                    reform_file_subpath = Path(reform_base_path) / filter_class.classname_as_path_segment()
+                first = False
+
+                #  make up full filepath
+                reform_path = Path(reform_file_subpath) / (src_filename + '.' + filter_class.format)
+              
                 # - bail if file exists 
                 if (reform_path.exists()):
                     ignored += 1

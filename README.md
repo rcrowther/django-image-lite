@@ -1,4 +1,6 @@
 # ImageLite
+NB: Version 1, because incompatible change behind API: filters now generate subfolders, not use prefix naming (I never used the feature, don't believe anyone else is)
+
 An app for local filesystem image storage. In truth, it's not 'Lite', with custom repository creation from an abstract base, an easy to configure and massively capable filter stack, enhanced upload options, and powerful template tags for rendering. But it's a reduction of a more general app, to avoid Django annoyances, so 'Lite'.
 
 This is [a rewrite of Wagtail's Image app](#credits).
@@ -252,20 +254,15 @@ An expanded version of the above,
         auto_delete_upload_file=True
         filters=[]
         reform_dir='news_reforms'
-        filter_suffix = True
         ...
 
 I hope what these attributes do is easy to understand. None of them are available through standard Django or, not in this simple way.
 
 The 'filters' attribute may need a little explanation. You provide an 'image_filters' file with each app, which implements image-lite. By default, the code will apply all the 'image_filters' to any uploaded file. This is awkward if there is two or more repositories in one app, because they all apply the same filters. In this case, you can set filters to a list of filter names, which will be the only filters used for that model/repository.
 
-filter_suffix needs explaining. Usually, image-lite extends a filename with the filter name. This namespaces each physical file, so you can keep thumbnails in the same directory as display files. However, if you only usse one filter on a repository, so only generate one reform, then the filtername suffix is unnecessary. Set,
+Multiple filters will generate subdirectories for filters after the first. The subdirectories are named from a lowercase version of the filter name. 
 
-    filter_suffix=False 
-
-and no filter name will be appended. 
-
-Since they are easy to create, I usually have many image repositories in every project, Each one usually has a single general filter, such as a SmartResize and watermark. So I use filter_suffix a lot. The repositories are categorising for me, and I have no need of further namespacing.
+Since they are easy to create, I usually have many image repositories in every project, Each one usually has a single general filter, such as a SmartResize and watermark. Further filters, generating subdirectories are there for format variations, like thumbnails. The repositories are categorising for me, and I have no need of further namespacing.
 
 Migrate, and you are up and running.
 

@@ -30,6 +30,7 @@ x Get working
 
 = Management commands
 x Revise
+Management commands: 'Reform List' and 'reform delete' currently not working due to ''subfolder' API change ('reform create' has been revised)
 
 = Filters
 

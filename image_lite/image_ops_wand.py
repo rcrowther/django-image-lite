@@ -60,6 +60,17 @@ def photoFX(wand, pop, grayscale, warm, night, strong, no, watermark):
     return wand
 
 
+def resize_force(wand, width, height):
+    '''
+    Resize if the image is too big.
+    Force to given size, stretching/squeezing the image as 
+    appropriate.
+    '''
+    wand.resize(width, height)
+    return wand
+
+
+    
 def resize_aspect(wand, width, height):
     '''
     Resize if the image is too big, preserving aspect ratio.

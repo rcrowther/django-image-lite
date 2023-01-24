@@ -194,7 +194,7 @@ class ResizeCropMixin():
         return errors
         
                                     
-class ResizeCropSmartMixin(ResizeCropMixin):
+class ResizeCropFillMixin(ResizeCropMixin):
     '''Resize an image.
     This resize lays the image on a background of ''fill-color'.
     So the result always matches the given sizes.

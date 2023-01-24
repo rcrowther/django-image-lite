@@ -4,7 +4,7 @@ from image_lite.filters import (
     Filter,
     FormatMixin,
     ResizeCropMixin,
-    ResizeCropSmartMixin,
+    ResizeCropFillMixin,
 )
 from image_lite import image_ops_pillow
 from image_lite.constants import FORMAT_APP_TO_UCLIB, FORMAT_UCLIB_TO_APP
@@ -89,9 +89,29 @@ class Format(FormatMixin, PillowProcess, Filter):
     '''
     
     
-    
+
+class ResizeForce(ResizeCropMixin, Format):
+    '''Resize an image.
+    Forces to the box defined by the given args. So the result will
+    be an image distorted to fit.
+    A base class e.g.
+        class Large(image.ResizeForce):
+            width=513
+            height=760    
+            iformat='png'
+    '''        
+    def modify(self, lib_image):
+        i = image_ops_pillow.resize_force(
+            lib_image, 
+            self.width,
+            self.height
+        )
+        return super().modify(i)
+        
+
+        
 class Resize(ResizeCropMixin, Format):
-    '''Resize n image.
+    '''Resize an image.
     Shrinks inside the box defined by the given args. So the result will
     usually be smaller width or height than the given box.
     A base class e.g.
@@ -108,7 +128,7 @@ class Resize(ResizeCropMixin, Format):
         )
         return super().modify(i)
 
-        
+
 
 class Crop(ResizeCropMixin, Format):
     '''Resize and maybe re-format an image.
@@ -126,14 +146,14 @@ class Crop(ResizeCropMixin, Format):
         )
         return super().modify(i)
 
-                
-                                    
-class ResizeSmart(ResizeCropSmartMixin, Format):
+
+                                
+class ResizeFill(ResizeCropFillMixin, Format):
     '''Resize an image.
     This resize lays the image on a background of ''fill-color'.
     So the result always matches the given sizes.
     A base class e.g.
-        class Large(image.ResizeSmart):
+        class Large(image.ResizeFill):
             width=513
             height=760    
             tpe='png'
@@ -157,10 +177,10 @@ class ResizeSmart(ResizeCropSmartMixin, Format):
 
 
 
-class CropSmart(ResizeCropSmartMixin, Format):
+class CropFill(ResizeCropFillMixin, Format):
     '''Resize and maybe re-format an image.
     A base class e.g.
-        class Large(image.CropSmart):
+        class Large(image.CropFill):
             width=513
             height=760    
             tpe='png'

@@ -2,7 +2,15 @@ from PIL import Image as PILImage
 import math
 
 
-
+def resize_force(pillow, width, height):
+    '''
+    Resize if the image is too big.
+    Force to given size, stretching/squeezing the image as 
+    appropriate.
+    '''
+    return pillow.resize((width, height))
+    
+        
 def resize_aspect(pillow, width, height):
     '''
     Resize if the image is too big, preserving aspect ratio.

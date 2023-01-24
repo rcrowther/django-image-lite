@@ -3,7 +3,7 @@ def register():
     Register the given filter classes with the image app:
 
     @register()
-    class Thumb(filters_pillow.ResizeSmart):
+    class Thumb(filters_pillow.ResizeFill):
         width=64
         height=64
     """

@@ -262,7 +262,7 @@ The 'filters' attribute may need a little explanation. You provide an 'image_fil
 
 Multiple filters will generate subdirectories for filters after the first. The subdirectories are named from a lowercase version of the filter name. 
 
-Since they are easy to create, I usually have many image repositories in every project, Each one usually has a single general filter, such as a SmartResize and watermark. Further filters, generating subdirectories are there for format variations, like thumbnails. The repositories are categorising for me, and I have no need of further namespacing.
+Since they are easy to create, I usually have many image repositories in every project, Each one usually has a single general filter, such as a ResizeFill and watermark. Further filters, generating subdirectories are there for format variations, like thumbnails. The repositories are categorising for me, and I have no need of further namespacing.
 
 Migrate, and you are up and running.
 
@@ -343,14 +343,23 @@ Files of filter definitions should be placed in a repository app. Create a file 
 
 
 ### Base filters
-The filter code is a stack of inherited classes. There are some base filters, which you can configure. These are centre-anchored, 
+The filter code is a stack of inherited classes. There are some base filters, which you can configure. These are centre-anchored, If you only need different image sizes, you only need to configure these.. Smpling is usually default BILINEAR (because choosing the filter for the material is more important. If you must, make your own filter).
 
-- Crop
-- Resize
-- SmartCrop
-- SmartResize
+#### ResizeForce
+Reshape the image to the given size.
 
-If you only need different image sizes, you only need to configure these.
+#### Crop
+Crop within boundaries of a given size. If the image is small, nothing happens, which may leave gaps.
+ 
+#### Resize
+Resize within boundaries of a given size. Aspect ratio preserved, which may leave gaps.
+
+#### CropFill
+Crop within boundaries of a given size. If the image is small, space filled with given background color.
+
+#### ResizeFill
+Resize within boundaries of a given size. Aspect ratio preserved, space filled with given background color.
+
 
 
 ### Filter declarations
@@ -379,14 +388,14 @@ which should be written as above (lowercase, and 'jpg', not 'jpeg'). So,
     registry.register(MediumImage)
 
 
-### 'Smart' filters
-Crop and Resize will crop or stretch the sides of images that do not fit the declared aspect ratio. This is behaviour as stated, and can be useful in many situations.
+### 'Fill' filters
+Crop and Resize will preserve aspect ratio. This I think is desired behaviour in many situations. However, it will leave gaps if the aspect ratio of the original does not match that given to reshape to.
 
-However, especially for display of premium images, it may be preferable that aspect ratio is preserved. This is what the Smart filters do. They make the image fit bounding dimensions, then fill surplus area with a fill colour,
+Sometimes it may be preferable that the image become the exact size given. One way is to distort the image ('Force' filters). Another way is the Fill filters. These make the image fit bounding dimensions, then fill surplus area with a fill colour,
 
-    from image import ResizeSmart, registry
+    from image import ResizeFill, registry
 
-    class MediumImage(ResizeSmart):
+    class MediumImage(ResizeFill):
         width=260
         height=350
         format='jpg'
@@ -402,7 +411,7 @@ Filters need to be registered. Registration style is like ModelAdmin, templates 
 
 You can use an explicit declaration,
 
-    from image_lite import ResizeSmart, registry
+    from image_lite import ResizeFill, registry
 
     ...
 
@@ -410,10 +419,10 @@ You can use an explicit declaration,
 
 Or use the decorator,
 
-    from image_lite import register, ResizeSmart
+    from image_lite import register, ResizeFill
 
     @register()
-    class MediumImage(ResizeSmart):
+    class MediumImage(ResizeFill):
         width=260
         height=350
         format='jpg'
@@ -426,7 +435,7 @@ The base filters in the Wand filter set have more attributes available. The 'wan
     from image import filters_wand, register
 
     @register()
-    class Medium(filters_wand.ResizeSmart):
+    class Medium(filters_wand.ResizeFill):
         width=260
         height=350
         format='jpg'

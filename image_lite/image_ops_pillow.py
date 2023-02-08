@@ -2,6 +2,29 @@ from PIL import Image as PILImage
 import math
 
 
+def photoFX(pillow, anchor):
+    if (anchor):
+        # break up the tuple of data
+        topBottom, leftRight, overlay_path = anchor
+        
+        # Get the image
+        with PILImage.open(overlay_path) as overlay_img:
+            # figure from locs the position
+            x = 0
+            y = 0
+            if (topBottom == 'bottom'):
+                y = pillow.height - overlay_img.height
+            if (leftRight == 'right'):
+                x = pillow.width - overlay_img.width                
+
+            # paste over
+            pillow.paste(overlay_img, (x, y))
+            
+            # ditch overlay data
+            overlay_img.close()
+    return pillow
+    
+
 def resize_force(pillow, width, height):
     '''
     Resize if the image is too big.

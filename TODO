@@ -33,7 +33,7 @@ x Revise
 Management commands: 'Reform List' and 'reform delete' currently not working due to ''subfolder' API change ('reform create' has been revised)
 
 = Filters
-
+Probably needs a CropForce (will always crop to dimensions, by resize if necessary)
 
 = Admin
 x revise stock model

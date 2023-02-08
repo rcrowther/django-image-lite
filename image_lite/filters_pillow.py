@@ -81,13 +81,26 @@ class PillowProcess:
         # simple return. PIL uses returns
         return lib_image
         
+
+class PillowFXMixin():
+    '''Establish the format for an image. 
+    Set format=None means the image is unchanged.
+    Most filters will contain and build from this base class.
+    '''
+    anchor=None
     
+    #! should if present check it has tuple of (yLoc, xLoc, path)
         
-class Format(FormatMixin, PillowProcess, Filter):
+        
+class Format(PillowFXMixin, FormatMixin, PillowProcess, Filter):
     '''Establish the format for an image. 
     Set iformat=None means the image is unchanged.
     '''
-    
+    def modify(self, lib_image):
+        return image_ops_pillow.photoFX(
+            lib_image, 
+            self.anchor,
+        )  
     
 
 class ResizeForce(ResizeCropMixin, Format):

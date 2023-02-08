@@ -428,8 +428,21 @@ Or use the decorator,
         format='jpg'
         fill_color="Coral"
 
+### Pillow filter attributes
+The base filters in the Pillow filter set have an attribute available. You gain,
 
-### Wand filters
+    from image import filters_pillow, register
+
+    @register()
+    class Medium(filters_pillow.ResizeFill):
+        width=260
+        height=350
+        format='jpg'
+        anchor=('top', 'right', 'image/logo-inset.png')
+
+''anchor' lets you overlay the reform image with another (fixed) image (presumed smaller?). A kind of rubber-stamp? The overlay image can be set into any corner of the reform image. The overlay image path is currently a Python filepath (sorry, I'm not helping much, am I? Sometime, maybe).
+
+### Wand filter attributes
 The base filters in the Wand filter set have more attributes available. The 'wand' code needs Wand to be installed on the host computer. Assuming that, you gain these effects,
 
     from image import filters_wand, register

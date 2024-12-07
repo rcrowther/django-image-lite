@@ -34,6 +34,32 @@ def resize_force(pillow, width, height):
     return pillow.resize((width, height))
     
         
+# Sriink only resize. Currently unused. R.C.        
+# def resize_aspect_2(pillow, width, height):
+    # '''
+    # Resize if the image is too big, preserving aspect ratio.
+    # Will not resize if dimensions match or are less than the source.
+    # @return an image within the given dimensions. The image is usually 
+    # smaller in one dimension than the given space.
+    # '''
+    # s = pillow.size
+    # current_width = s[0]
+    # current_height = s[1]
+    # width_reduce = current_width - width
+    # height_reduce = current_height - height
+    # if (width_reduce > height_reduce and width_reduce > 0):
+        # h =  math.floor((width * current_height)/current_width)
+        # return pillow.resize((width, h))
+        
+    # #NB the equality. On the not unlikely chance that the width 
+    # # reduction is the same as the height reduction (for example, 
+    # # squares), reduce by height.
+    # elif (height_reduce >= width_reduce and height_reduce > 0):
+        # w =  math.floor((height * current_width)/current_height)
+        # return pillow.resize((w, height))
+    # else:
+        # return pillow
+
 def resize_aspect(pillow, width, height):
     '''
     Resize if the image is too big, preserving aspect ratio.
@@ -44,20 +70,28 @@ def resize_aspect(pillow, width, height):
     s = pillow.size
     current_width = s[0]
     current_height = s[1]
-    width_reduce = current_width - width
-    height_reduce = current_height - height
-    if (width_reduce > height_reduce and width_reduce > 0):
+    width_diff = width - current_width 
+    height_diff = height - current_height
+    if (height_diff > width_diff):
+        # width-constrained resize
         h =  math.floor((width * current_height)/current_width)
+
+        # clamp to something visible
+        if (h <= 0):
+          h = 5
         return pillow.resize((width, h))
-        
-    #NB the equality. On the not unlikely chance that the width 
-    # reduction is the same as the height reduction (for example, 
-    # squares), reduce by height.
-    elif (height_reduce >= width_reduce and height_reduce > 0):
+
+    elif (height_diff < width_diff):
+        # height-constrained resize
         w =  math.floor((height * current_width)/current_height)
+        
+        # clamp to something visible
+        if (w <= 0):
+          w = 5
         return pillow.resize((w, height))
     else:
-        return pillow
+        # source aspect matches target 
+        return pillow.resize((width, height))
 
 
 

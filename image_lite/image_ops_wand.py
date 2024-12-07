@@ -69,29 +69,59 @@ def resize_force(wand, width, height):
     wand.resize(width, height)
     return wand
 
-
     
+# Sriink only resize. Currently unused. R.C.            
+# def resize_aspect_2(wand, width, height):
+    # '''
+    # Resize if the image is too big, preserving aspect ratio.
+    # Will not resize if dimensions match or are less than the source.
+    # @return an image within the given dimensions. The image is usually 
+    # smaller in one dimension than the given space.
+    # '''
+    # width_reduce = wand.width - width
+    # height_reduce = wand.height - height
+  
+    # if (width_reduce > height_reduce and width_reduce > 0):
+        # h = math.floor((width * wand.height)/wand.width)
+        # wand.resize(width, h)        
+
+    # #NB the equality. On the not unlikely chance that the width 
+    # # reduction is the same as the height reduction (for example, 
+    # # squares), reduce by height.
+    # elif (height_reduce >= width_reduce and height_reduce > 0):
+        # w = math.floor((height * wand.width)/wand.height)
+        # wand.resize(w, height)
+    # return wand
+
+
 def resize_aspect(wand, width, height):
     '''
     Resize if the image is too big, preserving aspect ratio.
-    Will not resize if dimensions match or are less than the source.
-    @return an image within the given dimensions. The image is usually 
+    @return an image within the given dimensions. The image may be 
     smaller in one dimension than the given space.
     '''
-    width_reduce = wand.width - width
-    height_reduce = wand.height - height
-  
-    if (width_reduce > height_reduce and width_reduce > 0):
-        h = math.floor((width * wand.height)/wand.width)
-        wand.resize(width, h)        
+    width_diff = width - wand.width
+    height_diff = height - wand.height
+    if (height_diff > width_diff):
+        # width-constrained resize
+        h =  math.floor((width * wand.height)/wand.width)
 
-    #NB the equality. On the not unlikely chance that the width 
-    # reduction is the same as the height reduction (for example, 
-    # squares), reduce by height.
-    elif (height_reduce >= width_reduce and height_reduce > 0):
-        w = math.floor((height * wand.width)/wand.height)
-        wand.resize(w, height)
-    return wand
+        # clamp to something visible
+        if (h <= 0):
+          h = 5
+        return wand.resize((width, h))
+
+    elif (height_diff < width_diff):
+        # height-constrained resize
+        w =  math.floor((height * wand.width)/wand.height)
+        
+        # clamp to something visible
+        if (w <= 0):
+          w = 5
+        return wand.resize((w, height))
+    else:
+        # source aspect matches target 
+        return wand.resize((width, height))
 
 
 

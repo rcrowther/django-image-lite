@@ -1,5 +1,5 @@
 """Local image handling for Django. Unobtusive, with multiple repositories, powerful filter system and scaleable data."""
-__version__ = '1.5.0'
+__version__ = '1.6.0'
 
 from image_lite.decorators import register
 from image_lite.filters import Filter

@@ -20,8 +20,8 @@ def photoFX(pillow, anchor):
             # paste over
             pillow.paste(overlay_img, (x, y))
             
-            # ditch overlay data
-            overlay_img.close()
+            # ditch overlay data (now self-closing? R.C.)
+            # overlay_img.close()
     return pillow
     
 

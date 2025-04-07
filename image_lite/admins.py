@@ -40,7 +40,7 @@ class ImageLiteAdmin(admin.ModelAdmin):
             obj.upload_time.strftime("%d %b %Y")
         )
     upload_day.short_description = 'Upload day'
-    upload_day.admin_order_field = '_upload_time'
+    upload_day.admin_order_field = 'upload_time'
 
     def filename(self, obj):
         return obj.filename
